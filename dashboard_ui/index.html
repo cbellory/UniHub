@@ -320,6 +320,87 @@
         .c-blue {
             color: #8be9fd;
         }
+
+        /* --- MODAL STYLES --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .modal-body input,
+        .modal-body textarea,
+        .modal-body select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Terminal Controls */
+        .term-controls {
+            display: flex;
+            gap: 10px;
+        }
     </style>
 </head>
 
@@ -555,15 +636,49 @@
         </div>
 
         <!-- GLOBAL TERMINAL -->
-        <div class="terminal-footer">
+        <div class="terminal-footer" id="term-footer">
             <div class="terminal-header">
-                <span>SYSTEM LOGS (Global)</span>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span>SYSTEM LOGS (Global)</span>
+                    <button class="term-clean-btn" onclick="toggleTerm()" id="term-toggle-btn">▼</button>
+                </div>
                 <div>
                     <button class="term-clean-btn" onclick="copyLog()" style="margin-right: 10px;">COPY</button>
                     <button class="term-clean-btn" onclick="clearTerm()">CLEAR</button>
                 </div>
             </div>
             <div class="terminal-out" id="console">Waiting for logs...</div>
+        </div>
+    </div>
+
+    <!-- GIT PUSH MODAL -->
+    <div id="git-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Push to GitHub</span>
+                <button class="modal-close" onclick="closeGitModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:var(--text-muted);">Commit
+                    Message</label>
+                <textarea id="git-msg" rows="3" placeholder="What changed?"></textarea>
+
+                <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:var(--text-muted);">Version Bump
+                    (Optional)</label>
+                <select id="git-bump">
+                    <option value="">No Change</option>
+                    <option value="patch">Patch (0.0.x) - Bug fixes</option>
+                    <option value="minor">Minor (0.x.0) - New features</option>
+                    <option value="major">Major (x.0.0) - Breaking changes</option>
+                </select>
+                <div style="font-size:0.75rem; color:#666; margin-top:-10px; margin-bottom:15px;" id="current-ver-hint">
+                    Current: ...</div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn" onclick="closeGitModal()" style="width:auto;">Cancel</button>
+                <button class="action-btn btn-primary" onclick="confirmGitPush()" style="width:auto;">🚀 Push &
+                    Deploy</button>
+            </div>
         </div>
     </div>
 
@@ -674,20 +789,23 @@
             document.getElementById('version-display').innerText = 'v' + d.version;
         });
 
-        async function gitPush() {
-            // Simple custom modal would be better, but for now let's use a smart interaction flow
-            const msg = prompt('Commit Message (leave empty for auto-generation):');
-            if (msg === null) return; // Cancelled
+        // --- GIT MODAL LOGIC ---
+        function openGitModal() {
+            document.getElementById('current-ver-hint').innerText = 'Current: ' + currentVersion;
+            document.getElementById('git-modal').style.display = 'flex';
+        }
 
-            let bumpType = null;
-            if (confirm(`Current Version: ${currentVersion}\nBump Version? (OK = Yes, Cancel = No)`)) {
-                // If Yes, ask which type
-                const type = prompt('Type: patch (0.0.1), minor (0.1.0), major (1.0.0)?', 'patch');
-                if (['patch', 'minor', 'major'].includes(type)) bumpType = type;
-            }
+        function closeGitModal() {
+            document.getElementById('git-modal').style.display = 'none';
+        }
 
-            log('--> Make sure you wait for "Push Completed" message!');
-            log('Starting Smart Git Push...');
+        async function confirmGitPush() {
+            const msg = document.getElementById('git-msg').value;
+            const bumpType = document.getElementById('git-bump').value || null;
+
+            closeGitModal();
+            log('--> Push initiated...');
+
             try {
                 await fetch('/api/git-push', {
                     method: 'POST',
@@ -695,6 +813,28 @@
                     body: JSON.stringify({ message: msg, bumpType })
                 });
             } catch (e) { log('API Error: ' + e.message); }
+        }
+
+        function gitPush() {
+            openGitModal();
+        }
+
+        // --- TERMINAL TOGGLE ---
+        let termMinimized = false;
+        function toggleTerm() {
+            const footer = document.getElementById('term-footer');
+            const btn = document.getElementById('term-toggle-btn');
+
+            if (termMinimized) {
+                footer.style.height = '35%';
+                footer.style.minHeight = '200px';
+                btn.innerText = '▼';
+            } else {
+                footer.style.height = '40px';
+                footer.style.minHeight = '40px';
+                btn.innerText = '▲';
+            }
+            termMinimized = !termMinimized;
         }
 
         // --- CONFIG WIZARD ---
