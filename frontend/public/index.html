@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ffffff" />
+
+  <!-- Опис проєкту для дипломної роботи -->
+  <meta name="description"
+    content="Гейміфікована система мотивації з використанням криптогаманця. Платформа заохочення користувачів через систему завдань, рейтингу та прогресу." />
+
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+  <!-- Назва відображається у вкладці браузера -->
+  <title>Гейміфікована мотиваційна система</title>
+
+  <!-- Аналітика (за потреби можна вимкнути) -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-YQDLN7VEFD');
+  </script>
+
+  <!-- Стилі базового тону (легкий нейтральний фон для презентабельного вигляду) -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f8fafc;
+      /* Match React Light Theme */
+      font-family: "Inter", sans-serif;
+    }
+
+    #root {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      /* Allow content to grow */
+    }
+
+    .loading-screen {
+      font-size: 18px;
+      color: #52525b;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+
+</head>
+
+<body>
+  <noscript>Щоб запустити застосунок, необхідно активувати JavaScript.</noscript>
+
+  <!-- React вставляє застосунок у цей контейнер -->
+  <div id="root">
+    <div class="loading-screen">
+      Завантаження застосунку...
+    </div>
+  </div>
+
+</body>
+
+</html>

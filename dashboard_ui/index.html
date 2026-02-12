@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeppLom Command Center</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --accent: #6366f1;
+            --text: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --purple: #a855f7;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: var(--panel);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+            gap: 20px;
+            overflow: hidden;
+        }
+
+        .terminal-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0c0c0c;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-header {
+            background: #1a1a1a;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .terminal {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #ccc;
+            white-space: pre-wrap;
+        }
+
+        /* Simple Coloring */
+        .color-red {
+            color: #ff5555;
+        }
+
+        .color-green {
+            color: #50fa7b;
+        }
+
+        .color-yellow {
+            color: #f1fa8c;
+        }
+
+        .color-blue {
+            color: #8be9fd;
+        }
+
+        .color-magenta {
+            color: #bd93f9;
+        }
+
+        h2 {
+            margin: 0 0 10px 0;
+            color: #fff;
+            font-size: 1.2rem;
+            letter-spacing: 0.5px;
+        }
+
+        h3 {
+            margin: 15px 0 5px 0;
+            color: #888;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .ip-badge {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--accent);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(2px);
+        }
+
+        button:active {
+            transform: translateX(1px);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #555;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .status-dot.active {
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        .status-dot.busy {
+            background: var(--warning);
+            box-shadow: 0 0 8px var(--warning);
+        }
+
+        .btn-start:hover {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .btn-stop:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .btn-restart:hover {
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .btn-backup:hover {
+            border-color: var(--purple);
+            color: var(--purple);
+        }
+
+        .btn-backup:hover {
+            border-color: var(--purple);
+            color: var(--purple);
+        }
+
+        .btn-restore:hover {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-repair:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .quick-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .quick-link {
+            text-align: center;
+            justify-content: center;
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--accent);
+        }
+
+        .quick-link:hover {
+            background: var(--accent);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .console-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .sm-btn {
+            padding: 5px 10px;
+            font-size: 12px;
+            background: #333;
+            border: none;
+            border-radius: 4px;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .sm-btn:hover {
+            color: #fff;
+            background: #444;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h2>DEEPLOM CONTROL</h2>
+        <div class="ip-badge" id="ip-display">Detecting IP...</div>
+
+        <h3 style="color: #6366f1;">⚡ Quick Launch</h3>
+        <div class="btn-group">
+            <button class="btn-start" style="border: 1px solid #10b981; background: rgba(16, 185, 129, 0.1);"
+                onclick="api('/api/start-prod')">
+                <span style="font-weight: bold; color: #10b981;">🚀 LAUNCH PRODUCTION</span>
+                <div style="font-size: 10px; opacity: 0.7; margin-top: 2px;">Use for cbellory.online</div>
+            </button>
+            <button class="btn-start" style="border: 1px solid #f59e0b; background: rgba(245, 158, 11, 0.1);"
+                onclick="api('/api/start-dev')">
+                <span style="font-weight: bold; color: #f59e0b;">🛠️ LAUNCH DEV MODE</span>
+                <div style="font-size: 10px; opacity: 0.7; margin-top: 2px;">Starts localhost dev servers</div>
+            </button>
+        </div>
+
+        <h3 style="color: #ef4444;">🌍 GLOBAL CONTROL</h3>
+        <div class="btn-group">
+            <button class="btn-start" style="border: 1px solid #10b981;" onclick="api('/api/start-all')">
+                <span style="font-weight: bold; color: #10b981;">▶ START ALL</span>
+                <div style="font-size: 10px; opacity: 0.7;">Backend, Frontend, Admin, DB</div>
+            </button>
+            <button class="btn-stop" style="border: 1px solid #ef4444;" onclick="api('/api/stop-all')">
+                <span style="font-weight: bold; color: #ef4444;">⏹ STOP ALL</span>
+                <div style="font-size: 10px; opacity: 0.7;">Stops all except Dashboard</div>
+            </button>
+        </div>
+
+        <h3>Server Control</h3>
+        <div class="btn-group">
+            <button class="btn-start" onclick="api('/api/start-backend')">
+                <span>▶ Start Server</span>
+                <div class="status-dot" id="led-backend"></div>
+            </button>
+            <button class="btn-restart" onclick="api('/api/restart-backend')">
+                <span>🔄 Restart Server</span>
+            </button>
+            <button class="btn-stop" onclick="api('/api/stop-backend')">
+                <span>⏹ Stop Server</span>
+            </button>
+        </div>
+
+        <h3>Database Tools (Safe Mode)</h3>
+        <div class="btn-group">
+            <button class="btn-start" onclick="api('/api/start-db')">
+                <span>🛡️ Safe Start DB</span>
+                <div class="status-dot" id="led-db-start"></div>
+            </button>
+            <button class="btn-stop" onclick="api('/api/hard-reset-db')">
+                <span>🧨 HARD RESET DB</span>
+                <div class="status-dot" id="led-db-reset"></div>
+            </button>
+            <button class="btn-repair" onclick="api('/api/repair-db')">
+                <span>🔧 Manual Repair</span>
+                <div class="status-dot" id="led-repair-db"></div>
+            </button>
+        </div>
+
+        <h3>Build Tools</h3>
+        <div class="btn-group">
+            <button onclick="api('/api/build-frontend')">
+                <span>🔨 Build Frontend</span>
+                <div class="status-dot" id="led-frontend-build"></div>
+            </button>
+            <button onclick="api('/api/build-admin')">
+                <span>🔨 Build Admin</span>
+                <div class="status-dot" id="led-admin-build"></div>
+            </button>
+        </div>
+
+        <h3>Backups</h3>
+        <div class="btn-group">
+            <button class="btn-backup" onclick="api('/api/backup-db')">
+                <span>💾 Backup Database</span>
+                <div class="status-dot" id="led-backup-db"></div>
+            </button>
+            <button class="btn-backup" onclick="api('/api/backup-project')">
+                <span>📦 Backup Project Files</span>
+                <div class="status-dot" id="led-backup-project"></div>
+            </button>
+        </div>
+
+        <h3>Recovery</h3>
+        <div class="btn-group"
+            style="padding: 10px; border: 1px solid #ef4444; border-radius: 8px; background: rgba(239, 68, 68, 0.05);">
+            <div style="font-size: 11px; color: #ef4444; margin-bottom: 5px;">⚠️ DANGER ZONE: RESTORE</div>
+
+            <select id="backup-select"
+                style="width: 100%; padding: 8px; background: #000; color: #fff; border: 1px solid #444; border-radius: 4px; margin-bottom: 8px;">
+                <option value="">Loading backups...</option>
+            </select>
+
+            <button class="btn-restore" onclick="triggerRestore()">
+                <span>♻ Restore Selected</span>
+                <div class="status-dot" id="led-restore-db"></div>
+            </button>
+        </div>
+
+        <div class="quick-links">
+            <button class="quick-link" onclick="window.open('https://cbellory.online', '_blank')">🌐
+                cbellory.online</button>
+            <button class="quick-link" onclick="window.open('https://cbellory.online/admin', '_blank')">🛡️ Admin
+                Panel</button>
+        </div>
+        <div style="text-align: center; margin-top: 10px;">
+            <a href="#" id="local-ip-link" style="color: #666; font-size: 11px; text-decoration: none;">(Open via Local
+                IP)</a>
+        </div>
+
+        <div style="margin-top: 20px; text-align: center;">
+            <button class="btn-stop"
+                style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; width: 100%; justify-content: center;"
+                onclick="shutdownDashboard()">
+                ❌ Shutdown Panel
+            </button>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="terminal-container">
+            <div class="terminal-header">
+                <span style="color: #666; font-size: 12px;">TERMINAL OUTPUT</span>
+                <div class="console-actions">
+                    <button class="sm-btn" onclick="clearTerm()">Clear</button>
+                    <button class="sm-btn" onclick="copyLog()">Copy</button>
+                </div>
+            </div>
+            <div class="terminal" id="console"></div>
+        </div>
+    </div>
+
+    <script>
+        const term = document.getElementById('console');
+        let currentIP = 'localhost';
+
+        // --- LOGIC ---
+        let lastLineDiv = null;
+
+        function colorize(text) {
+            // Basic ANSI stripping or simple coloring
+            return text
+                .replace(/Error:/g, '<span class="color-red">Error:</span>')
+                .replace(/Warning:/g, '<span class="color-yellow">Warning:</span>')
+                .replace(/Success:/g, '<span class="color-green">Success:</span>')
+                .replace(/> Executing:.*/g, '<span class="color-magenta">$&</span>');
+        }
+
+        function log(text) {
+            // Check for carriage return (animation update)
+            let isUpdate = false;
+            let content = text;
+
+            // Check for \r at start
+            if (content.indexOf('\\r') === 0 || content.charCodeAt(0) === 13) {
+                isUpdate = true;
+                content = content.replace(/^\\r+/, '').trim();
+            }
+
+            content = colorize(content);
+
+            if (isUpdate && lastLineDiv) {
+                lastLineDiv.innerHTML = content;
+            } else {
+                const div = document.createElement('div');
+                div.innerHTML = content;
+                term.appendChild(div);
+                lastLineDiv = div;
+                term.scrollTop = term.scrollHeight;
+            }
+        }
+
+        function clearTerm() {
+            term.innerHTML = '';
+            lastLineDiv = null;
+        }
+
+        function copyLog() {
+            navigator.clipboard.writeText(term.innerText);
+            alert('Logs copied to clipboard!');
+        }
+
+        async function api(url) {
+            try {
+                const res = await fetch(url, { method: 'POST' });
+                const data = await res.json();
+                // success message logged via websocket
+            } catch (e) {
+                log('Error connecting to API: ' + e.message);
+            }
+        }
+
+        fetch('/api/ip').then(r => r.json()).then(d => {
+            currentIP = d.ip;
+            document.getElementById('ip-display').innerText = 'LAN: ' + d.ip;
+            document.getElementById('local-ip-link').onclick = () => window.open('http://' + d.ip + ':9999', '_blank');
+            document.getElementById('local-ip-link').onclick = () => window.open('http://' + d.ip + ':9999', '_blank');
+        }).catch(console.error);
+
+        // Fetch Backups
+        function loadBackups() {
+            fetch('/api/get-db-backups')
+                .then(r => r.json())
+                .then(list => {
+                    const sel = document.getElementById('backup-select');
+                    sel.innerHTML = '';
+                    if (list.length === 0) {
+                        const opt = document.createElement('option');
+                        opt.text = "No backups found";
+                        sel.add(opt);
+                    } else {
+                        list.forEach(b => {
+                            const opt = document.createElement('option');
+                            opt.value = b;
+                            // Format: backup_2024-12-12-10-00-00 -> 2024-12-12 10:00:00
+                            opt.text = b.replace('backup_', '').replace(/-/g, ':').replace('T', ' ').slice(0, 19);
+                            sel.add(opt);
+                        });
+                    }
+                })
+                .catch(e => {
+                    document.getElementById('backup-select').innerHTML = '<option>Error loading</option>';
+                    console.error(e);
+                });
+        }
+        loadBackups();
+
+        async function triggerRestore() {
+            const folder = document.getElementById('backup-select').value;
+            if (!folder || folder.includes(' ')) {
+                alert('Please select a valid backup first.');
+                return;
+            }
+
+            if (!confirm('⚠️ WARNING: This will ERASE current database and restore from ' + folder + '. Are you sure?')) return;
+
+            try {
+                const res = await fetch('/api/restore-db', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ folder })
+                });
+                const data = await res.json();
+                if (res.status !== 200) alert('Error: ' + data.msg);
+            } catch (e) {
+                log('Error connecting to API: ' + e.message);
+            }
+        }
+
+        async function shutdownDashboard() {
+            if (!confirm('Are you sure you want to CLOSE the Control Center? The website will keep running, but this panel will go offline.')) return;
+
+            try {
+                await fetch('/api/shutdown', { method: 'POST' });
+                alert('Control Center is shutting down. You can close this tab.');
+                document.body.innerHTML = '<div style="display:flex;height:100vh;justify-content:center;align-items:center;background:#000;color:#fff;"><h1>Control Center Offline</h1></div>';
+            } catch (e) {
+                alert('Error shutting down: ' + e.message);
+            }
+        }
+
+        // Websocket
+        const ws = new WebSocket('ws://' + window.location.host);
+
+        ws.onopen = () => {
+            log('<span class="color-green">> System Connected. Ready.</span>');
+        };
+
+        ws.onmessage = (event) => {
+            try {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'status') {
+                    const led = document.getElementById('led-' + msg.id);
+                    if (led) {
+                        if (msg.isRunning) led.classList.add(msg.id.includes('build') || msg.id.includes('backup') ? 'busy' : 'active');
+                        else led.classList.remove('active', 'busy');
+                    }
+                } else {
+                    log(msg.data);
+                }
+            } catch (e) { console.error(e); }
+        };
+
+        ws.onerror = (e) => console.log("WS Error", e);
+    </script>
+</body>
+
+</html>

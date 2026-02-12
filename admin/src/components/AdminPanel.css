@@ -1,0 +1,43 @@
+/* ================================
+   AdminPanel.css
+   ================================
+   Этот файл теперь служит только для
+   локальных переопределений компонентов.
+   Основная тема и цвета находятся в App.css
+================================== */
+
+.admin-sidebar.surface {
+  background: var(--surface);
+}
+
+.admin-stats.surface {
+  background: var(--surface);
+}
+
+.admin-content-paper.surface {
+  background: var(--surface);
+}
+
+/* Custom Scrollbar for Sidebar */
+.admin-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* For Firefox */
+.admin-sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}

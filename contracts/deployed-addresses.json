@@ -1,0 +1,18 @@
+{
+  "network": "BNB Smart Chain Testnet",
+  "chainId": 97,
+  "deployedAt": "2025-12-04T23:54:46.621Z",
+  "deployer": "0x7FdCA82e2D1b4EA9cd94B5d22a5B6d872e473dCE",
+  "contracts": {
+    "UniversityCoin": {
+      "address": "0x101D7361767cA6C581974D8b54B62aa1ae230B50",
+      "name": "University Coin",
+      "symbol": "UCN"
+    },
+    "SoulboundDiploma": {
+      "address": "0x6FA7413d881C01F21c4D53e543FB35091210fAD3",
+      "name": "University Diploma",
+      "symbol": "UDIP"
+    }
+  }
+}

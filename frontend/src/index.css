@@ -1,0 +1,554 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap');
+
+:root {
+  /* DARK COSMIC THEME */
+  --bg-primary: #030014;
+  --bg-secondary: #0f172a;
+
+  /* NEON ACCENTS */
+  --color-violet: #6366f1;
+  --color-cyan: #06b6d4;
+  --color-pink: #d946ef;
+
+  /* GLASS */
+  --glass-bg: rgba(30, 41, 59, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.1);
+
+  /* TEXT */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-primary);
+  /* Fallback if React not loaded */
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Orbitron', 'Inter', sans-serif;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Global Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Selection */
+::selection {
+  background: rgba(99, 102, 241, 0.3);
+  color: #fff;
+}
+
+/* --- SHOP CUSTOMIZATIONS --- */
+
+/* 1. Avatar Frames */
+.frame-neon-blue {
+  box-shadow: 0 0 10px #0ea5e9, 0 0 20px #0ea5e9, inset 0 0 10px #0ea5e9;
+  border: 2px solid #0ea5e9 !important;
+  border-radius: 50%;
+  animation: pulse-blue 2s infinite;
+}
+
+@keyframes pulse-blue {
+  0% {
+    box-shadow: 0 0 10px #0ea5e9;
+  }
+
+  50% {
+    box-shadow: 0 0 25px #0ea5e9, 0 0 10px #fff;
+  }
+
+  100% {
+    box-shadow: 0 0 10px #0ea5e9;
+  }
+}
+
+.frame-golden {
+  background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700);
+  padding: 3px;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+.frame-cyber {
+  border: 2px dashed #d946ef !important;
+  box-shadow: 0 0 10px #d946ef;
+  position: relative;
+  border-radius: 50%;
+}
+
+.frame-cyber::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border: 1px solid rgba(217, 70, 239, 0.5);
+  border-radius: 50%;
+  animation: spin 10s linear infinite;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* NEW FRAMES */
+.frame-plasma {
+  border: 3px solid #db2777 !important;
+  box-shadow: 0 0 15px #db2777, inset 0 0 10px #db2777;
+  border-radius: 50%;
+}
+
+.frame-nature {
+  border: 3px solid #22c55e !important;
+  box-shadow: 0 0 10px #22c55e;
+  border-style: double !important;
+  border-radius: 50%;
+}
+
+.frame-ice {
+  border: 2px solid #a5f3fc !important;
+  box-shadow: 0 0 20px #a5f3fc;
+  border-radius: 50%;
+  background: rgba(165, 243, 252, 0.1);
+}
+
+.frame-magma {
+  border: 3px solid #ef4444 !important;
+  box-shadow: 0 0 20px #ef4444, inset 0 0 10px #f59e0b;
+  border-radius: 50%;
+  animation: pulse-magma 3s infinite;
+}
+
+@keyframes pulse-magma {
+  50% {
+    border-color: #f59e0b;
+    box-shadow: 0 0 30px #ef4444;
+  }
+}
+
+.frame-retro {
+  border: 4px solid #fff !important;
+  outline: 4px solid #000;
+  box-shadow: 0 0 0 4px #fff;
+  border-radius: 50%;
+}
+
+.frame-quantum {
+  border: 2px solid #8b5cf6 !important;
+  border-radius: 50%;
+  position: relative;
+}
+
+.frame-quantum::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 1px solid #6366f1;
+  border-radius: 50%;
+  animation: spin 4s linear infinite;
+}
+
+.frame-steampunk {
+  border: 5px solid #b45309 !important;
+  border-radius: 50%;
+  box-shadow: inset 0 0 10px #000;
+}
+
+.frame-void {
+  border: 1px solid #333 !important;
+  background: #000;
+  box-shadow: 0 0 30px #000;
+  border-radius: 50%;
+}
+
+.frame-holofoil {
+  border: 3px solid transparent !important;
+  background: linear-gradient(#fff, #fff) padding-box, linear-gradient(45deg, red, blue) border-box;
+  border-radius: 50%;
+}
+
+.frame-crystal {
+  border: 4px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+}
+
+/* 2. Nickname Effects */
+.nick-fire {
+  background: linear-gradient(to right, #facc15, #ef4444);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  font-weight: bold;
+  text-shadow: 0 0 2px rgba(239, 68, 68, 0.3);
+}
+
+.nick-toxic {
+  color: #84cc16 !important;
+  text-shadow: 0 0 5px #84cc16, 0 0 10px #3f6212;
+  font-family: 'Consolas', monospace;
+}
+
+.nick-platinum {
+  background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 50%, #f8fafc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+/* NEW NICKS */
+.nick-rainbow {
+  background: linear-gradient(to right, #ef4444, #f59e0b, #22c55e, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  font-weight: bold;
+}
+
+.nick-ice {
+  color: #bae6fd !important;
+  text-shadow: 0 0 5px #bae6fd, 0 0 10px #0ea5e9;
+  font-style: italic;
+}
+
+.nick-thunder {
+  color: #facc15 !important;
+  text-shadow: 0 0 10px #facc15;
+  animation: blink 0.2s infinite;
+}
+
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.nick-ghost {
+  color: rgba(255, 255, 255, 0.5) !important;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  filter: blur(0.5px);
+}
+
+.nick-matrix {
+  color: #22c55e !important;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 5px #22c55e;
+}
+
+.nick-neon-pink {
+  color: #ff00ff !important;
+  text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+}
+
+.nick-camouflage {
+  background: repeating-linear-gradient(45deg, #3f6212, #3f6212 10px, #65a30d 10px, #65a30d 20px);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  font-weight: bold;
+}
+
+.nick-metal {
+  background: linear-gradient(to bottom, #94a3b8, #475569, #94a3b8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.nick-galaxy {
+  background: linear-gradient(45deg, #6366f1, #d946ef, #ec4899);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  font-weight: bold;
+}
+
+.nick-pixel {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #fff !important;
+}
+
+/* 3. Profile Backgrounds (Applied to Container) */
+.bg-matrix {
+  background-color: #000;
+  background-image:
+    linear-gradient(rgba(0, 255, 70, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 70, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  position: relative;
+}
+
+.bg-matrix::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, transparent 20%, #000 150%);
+}
+
+.bg-nebula {
+  background: radial-gradient(circle at 50% 50%, #2e1065, #0f172a);
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-nebula::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+  animation: float 20s infinite alternate;
+}
+
+@keyframes float {
+  from {
+    transform: translate(0, 0);
+  }
+
+  to {
+    transform: translate(20px, 20px);
+  }
+}
+
+.bg-tech {
+  background-color: #111;
+  background-image:
+    linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222),
+    linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222);
+  background-position: 0 0, 10px 10px;
+  background-size: 20px 20px;
+}
+
+/* NEW BACKGROUNDS */
+.bg-grid {
+  background-color: #0f172a;
+  background-image: linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.bg-stars {
+  background-color: #000;
+  background-image: radial-gradient(white, rgba(255, 255, 255, .2) 2px, transparent 3px), radial-gradient(white, rgba(255, 255, 255, .15) 1px, transparent 2px);
+  background-size: 550px 550px, 350px 350px;
+  background-position: 0 0, 200px 30px;
+}
+
+.bg-sunset {
+  background: linear-gradient(180deg, #4c1d95 0%, #db2777 50%, #f59e0b 100%);
+}
+
+.bg-waves {
+  background: radial-gradient(circle at 100% 50%, transparent 20%, rgba(255, 255, 255, .3) 21%, rgba(255, 255, 255, .3) 34%, transparent 35%, transparent), radial-gradient(circle at 0% 50%, transparent 20%, rgba(255, 255, 255, .3) 21%, rgba(255, 255, 255, .3) 34%, transparent 35%, transparent) 0 50px;
+  background-color: #0f172a;
+  background-size: 75px 100px;
+}
+
+.bg-hexagons {
+  background-color: #111;
+  background-image: radial-gradient(transparent 60%, rgba(0, 0, 0, 0.8)), url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="28" height="49" viewBox="0 0 28 49"%3E%3Cg fill-rule="evenodd"%3E%3Cg id="hexagons" fill="%23222" fill-opacity="0.4" fill-rule="nonzero"%3E%3Cpath d="M13.99 9.25l13 .75-13-.75L.99 9.25l13 .75z"/%3E%3Cpath d="M13.99 4.25l13 .75-13-.75L.99 4.25l13 .75z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+  /* Simplified fallback */
+}
+
+.bg-circuit {
+  background-color: #1a1a1a;
+  background-image: radial-gradient(#333 15%, transparent 16%);
+  background-size: 16px 16px;
+}
+
+.bg-stripes {
+  background: repeating-linear-gradient(-45deg, #1e293b, #1e293b 10px, #0f172a 10px, #0f172a 20px);
+}
+
+.bg-dots {
+  background-color: #0f172a;
+  background-image: radial-gradient(#334155 2px, transparent 2px);
+  background-size: 20px 20px;
+}
+
+.bg-radial {
+  background: repeating-radial-gradient(circle at 0 0, transparent 0, #0f172a 10px), repeating-linear-gradient(#1e293b55, #1e293b);
+}
+
+.bg-zigzag {
+  background: linear-gradient(135deg, #09090b 25%, transparent 25%) -50px 0, linear-gradient(225deg, #09090b 25%, transparent 25%) -50px 0, linear-gradient(315deg, #09090b 25%, transparent 25%), linear-gradient(45deg, #09090b 25%, transparent 25%);
+  background-size: 100px 100px;
+  background-color: #18181b;
+}
+
+/* --- UKRAINE THEME --- */
+
+/* Frame: Split Blue/Yellow Ring with Glow */
+.frame-flag-ua {
+  background: linear-gradient(#0057B8, #FFD700) border-box;
+  /* Fallback */
+  border: 4px solid transparent !important;
+  background: linear-gradient(#18181b, #18181b) padding-box,
+    linear-gradient(to bottom, #0057B8 50%, #FFD700 50%) border-box;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(0, 87, 184, 0.5), 0 0 15px rgba(255, 215, 0, 0.5);
+  position: relative;
+}
+
+/* Nick: Gradient Blue to Yellow Text */
+.nick-flag-ua {
+  background: linear-gradient(to bottom, #0057B8 45%, #FFD700 55%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  font-weight: 800;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.2);
+  letter-spacing: 0.5px;
+}
+
+/* BG: Aesthetic Blue-Yellow Gradient Overlay (VIBRANT) */
+.bg-flag-ua {
+  background: linear-gradient(135deg, #0057B8 0%, #1e293b 50%, #FFD700 100%);
+  background-color: #0f172a;
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-flag-ua::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #0057B8, #FFD700);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+  opacity: 1;
+}
+
+/* --- CYBERPUNK GLOBAL EFFECTS --- */
+
+/* Moving Grid Background */
+.cyber-grid-bg {
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -10;
+  pointer-events: none;
+  perspective: 500px;
+}
+
+.cyber-grid-bg::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, transparent 0%, var(--bg-primary) 90%);
+}
+
+/* CRT Scanline Overlay */
+.crt-overlay {
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%,
+      rgba(0, 0, 0, 0.1) 50%);
+  background-size: 100% 4px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.2;
+}
+
+/* Neon Text Glow Utility */
+.text-neon {
+  text-shadow: 0 0 5px var(--color-violet), 0 0 10px var(--color-violet), 0 0 20px var(--color-violet);
+}
+
+/* Floating Animation */
+@keyframes cyber-float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float {
+  animation: cyber-float 6s ease-in-out infinite;
+}

@@ -1,0 +1,22 @@
+.user-profile-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .text-field {
+    margin-bottom: 16px;
+  }
+  
+  .avatar-preview {
+    width: 100px;
+    height: 100px;
+    margin: 20px;
+  }
+  
+  .submit-button {
+    margin-top: 16px;
+    display: block;
+    width: 100%;
+  }
+  

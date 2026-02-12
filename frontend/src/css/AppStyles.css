@@ -1,0 +1,155 @@
+/* Основной контейнер приложения */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+    background-color: #1c1c1c; /* Темный фон всего сайта */
+    min-height: 100vh;
+    padding: 20px;
+  }
+  
+  /* Секция профиля */
+  .profile-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 10px 0;
+  }
+  
+  /* Стиль для аватара */
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+    border: 3px solid #FFD700; /* Желтая окантовка */
+    margin-bottom: 15px;
+  }
+  
+  /* Имя пользователя */
+  .profile-username {
+    font-size: 1.2rem;
+    color: #fff;
+    background-color: #2C2C2C; /* Темный фон */
+    padding: 8px 16px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Кнопки подключения и отключения кошелька */
+  .profile-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    justify-content: center;
+  }
+  
+  .profile-button {
+    background-color: #8B0000;
+    color: #fff;
+    padding: 10px 16px;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+  
+  .profile-button:hover {
+    background-color: #5A1010;
+  }
+  
+  /* Модальное окно профиля */
+  .profile-modal {
+    background-color: #333;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 500px;
+    margin: auto;
+  }
+  
+  /* BattlePass и TaskSystem */
+  .battlepass-task-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  /* Секция BattlePass */
+  .battlepass-section {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #333333; /* Темный фон BattlePass */
+    border-radius: 10px;
+  }
+  
+  /* Задачи */
+  .task-system-section {
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #2C2C2C;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Карточки заданий */
+  .task-card {
+    background-color: #3D3D3D;
+    color: #fff;
+    border-radius: 10px;
+    padding: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .task-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+  }
+  
+  .task-title {
+    color: #FFD700;
+    margin-bottom: 10px;
+  }
+  
+  /* Кнопки выполнения заданий */
+  .task-button {
+    background-color: #8B0000;
+    color: #fff;
+    border-radius: 6px;
+    padding: 8px 12px;
+  }
+  
+  .task-button:hover {
+    background-color: #5A1010;
+  }
+  
+  /* Секция рейтинга пользователей */
+  .user-rating-section {
+    margin-top: 20px;
+    width: 100%;
+    padding: 20px;
+    background-color: #2C2C2C; /* Темный фон */
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .user-rating-title {
+    color: #FFD700;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  
+  /* Фон страницы */
+  body {
+    background-color: #1c1c1c; /* Темный основной фон */
+    color: #ffffff;
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+  }
+  

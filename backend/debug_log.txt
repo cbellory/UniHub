@@ -1,0 +1,27 @@
+Date: 14.12.2025  7:03:47,87 
+Current Directory: C:\Proj\Proj\DeppLom\backend 
+Checking Node version... 
+v24.12.0
+ 
+Attempting to start server directly (node server.js)... 
+WebSocket-сервер налаштований та готовий до роботи.
+✅80
+(node:7772) DeprecationWarning: collection.ensureIndex is deprecated. Use createIndexes instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+MongoDB підключена
+^CCurrent Directory: C:\Proj\Proj\DeppLom\backend 
+Checking Node version... 
+v24.12.0
+ 
+Attempting to start server directly (node server.js)... 
+WebSocket-сервер налаштований та готовий до роботи.
+✅80
+(node:6972) DeprecationWarning: collection.ensureIndex is deprecated. Use createIndexes instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+MongoDB підключена
+[Register Endpoint] Получен новый запрос. Тело: {
+  "address": "0x417339aAABc69BAE824A044F33D5D1b433F30885",
+  "ip": "146.0.83.161",
+  "referral": null
+}
+[Registration] Пользователь 0x417339aAABc69BAE824A044F33D5D1b433F30885 уже существует.
