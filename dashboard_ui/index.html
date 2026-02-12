@@ -326,16 +326,24 @@
 <body>
 
     <div class="sidebar">
-        <div class="brand">🎓 UniHub <span>Console</span></div>
+        <div class="brand">
+            🎓 UniHub <span>Console</span>
+            <span id="version-display"
+                style="font-size:0.7rem; background:#333; padding:2px 6px; border-radius:4px; margin-left:auto; color:#888;">v...</span>
+        </div>
 
         <button class="nav-btn active" onclick="switchTab('overview')">🏠 Overview</button>
         <button class="nav-btn" onclick="switchTab('control')">⚙️ Controls</button>
+        <button class="nav-btn" onclick="switchTab('tools')">🛠 Tools</button>
         <button class="nav-btn" onclick="switchTab('git')">☁️ Git Deploy</button>
         <button class="nav-btn" onclick="switchTab('backup')">💾 Backups</button>
 
         <div class="sidebar-footer">
             <div style="font-size: 0.8rem; color: #666; text-align: center; margin-bottom: 15px;" id="ip-display">IP:
                 Checking...</div>
+            <button class="action-btn" onclick="restartPanel()"
+                style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border-color: #f59e0b;">🔄 Restart
+                Panel</button>
             <button class="action-btn btn-danger" onclick="shutdownPanel()">❌ Shutdown Panel</button>
         </div>
     </div>
@@ -412,6 +420,18 @@
                         <button class="action-btn" onclick="checkGitStatus()">🔍 Check Status</button>
                         <button class="action-btn btn-primary" onclick="gitPush()">⬆ Push to GitHub</button>
                         <button class="action-btn btn-success" onclick="api('/api/git-pull')">⬇ Pull Updates</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: TOOLS -->
+            <div id="tab-tools" class="tab-content">
+                <div class="card">
+                    <h3>Project Tools & Scripts</h3>
+                    <p style="color: #94a3b8; margin-bottom: 20px;">Safety First: Only run scripts if you know what they
+                        do.</p>
+                    <div id="tools-list" class="grid">
+                        <!-- Tools injected here -->
                     </div>
                 </div>
             </div>
@@ -500,17 +520,31 @@
             } catch (e) { log('Git Error: ' + e.message); }
         }
 
+        let currentVersion = '0.0.0';
+        fetch('/api/version').then(r => r.json()).then(d => {
+            currentVersion = d.version;
+            document.getElementById('version-display').innerText = 'v' + d.version;
+        });
+
         async function gitPush() {
-            const msg = prompt('Commit Message:', 'Update from Dashboard');
-            if (!msg) return;
+            // Simple custom modal would be better, but for now let's use a smart interaction flow
+            const msg = prompt('Commit Message (leave empty for auto-generation):');
+            if (msg === null) return; // Cancelled
+
+            let bumpType = null;
+            if (confirm(`Current Version: ${currentVersion}\nBump Version? (OK = Yes, Cancel = No)`)) {
+                // If Yes, ask which type
+                const type = prompt('Type: patch (0.0.1), minor (0.1.0), major (1.0.0)?', 'patch');
+                if (['patch', 'minor', 'major'].includes(type)) bumpType = type;
+            }
 
             log('--> Make sure you wait for "Push Completed" message!');
-            log('Starting Git Push: ' + msg);
+            log('Starting Smart Git Push...');
             try {
                 await fetch('/api/git-push', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: msg })
+                    body: JSON.stringify({ message: msg, bumpType })
                 });
             } catch (e) { log('API Error: ' + e.message); }
         }
@@ -581,6 +615,40 @@
 
         async function shutdownPanel() {
             if (confirm('Stop the Dashboard Panel?')) api('/api/shutdown');
+        }
+
+        // Load tools
+        function loadTools() {
+            fetch('/api/tools').then(r => r.json()).then(list => {
+                const container = document.getElementById('tools-list');
+                container.innerHTML = '';
+                list.forEach(file => {
+                    const div = document.createElement('div');
+                    div.style.background = 'rgba(255,255,255,0.05)';
+                    div.style.padding = '15px';
+                    div.style.borderRadius = '8px';
+                    div.style.display = 'flex';
+                    div.style.justifyContent = 'space-between';
+                    div.style.alignItems = 'center';
+
+                    div.innerHTML = `
+                        <div style="font-weight:500">${file}</div>
+                        <button class="action-btn" style="width:auto; margin:0;" onclick="runTool('${file}')">▶ Run</button>
+                    `;
+                    container.appendChild(div);
+                });
+            });
+        }
+        loadTools();
+
+        async function runTool(script) {
+            if (confirm(`Run script: ${script}?`)) {
+                await fetch('/api/run-tool', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ script })
+                });
+            }
         }
     </script>
 </body>

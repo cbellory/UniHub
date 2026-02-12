@@ -450,6 +450,14 @@ app.post('/api/shutdown', (req, res) => {
     }, 1000);
 });
 
+// --- Version API ---
+app.get('/api/version', (req, res) => {
+    try {
+        const pkg = JSON.parse(fs.readFileSync(path.join(PROJECT_ROOT, 'package.json'), 'utf8'));
+        res.json({ version: pkg.version || '0.0.0' });
+    } catch (e) { res.json({ version: '0.0.0' }); }
+});
+
 // --- Git Control ---
 app.get('/api/git-status', async (req, res) => {
     try {
@@ -462,15 +470,46 @@ app.get('/api/git-status', async (req, res) => {
 
 app.post('/api/git-push', (req, res) => {
     if (processes['git']) return res.status(400).json({ msg: 'Git operation in progress' });
-    const { message } = req.body;
-    const msg = message || 'Update from Dashboard';
 
-    // Chain commands: Add -> Commit -> Push
-    // Note: This relies on credential.helper store being configured!
-    const cmd = `git add . && git commit -m "${msg}" && git push`;
+    let { message, bumpType } = req.body; // bumpType: 'patch', 'minor', 'major' or null
 
-    runCommand(cmd, PROJECT_ROOT, 'git', [], { shell: true });
-    res.json({ msg: 'Git Push started...' });
+    try {
+        // 1. Auto Versioning
+        let version = '0.0.0';
+        if (bumpType) {
+            const pkgPath = path.join(PROJECT_ROOT, 'package.json');
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            const parts = (pkg.version || '0.0.0').split('.').map(Number);
+
+            if (bumpType === 'major') { parts[0]++; parts[1] = 0; parts[2] = 0; }
+            else if (bumpType === 'minor') { parts[1]++; parts[2] = 0; }
+            else { parts[2]++; } // patch default
+
+            version = parts.join('.');
+            pkg.version = version;
+            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
+            broadcastLog('git', `Version bumped to ${version}`);
+        } else {
+            const pkg = JSON.parse(fs.readFileSync(path.join(PROJECT_ROOT, 'package.json'), 'utf8'));
+            version = pkg.version;
+        }
+
+        // 2. Default Message
+        if (!message) {
+            const date = new Date().toISOString().split('T')[0];
+            message = `Update v${version} (${date})`;
+        }
+
+        // 3. Chain commands
+        // If bumped, we need to add package.json explicitly or just 'git add .' covers it
+        const cmd = `git add . && git commit -m "${message}" && git push`;
+
+        runCommand(cmd, PROJECT_ROOT, 'git', [], { shell: true });
+        res.json({ msg: `Git Push started (v${version})...` });
+
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 app.post('/api/git-pull', (req, res) => {
@@ -478,6 +517,28 @@ app.post('/api/git-pull', (req, res) => {
 
     runCommand('git pull', PROJECT_ROOT, 'git', [], { shell: true });
     res.json({ msg: 'Git Pull started...' });
+});
+
+// --- Tools API ---
+app.get('/api/tools', (req, res) => {
+    const toolsDir = path.join(PROJECT_ROOT, 'tools');
+    if (!fs.existsSync(toolsDir)) return res.json([]);
+    const files = fs.readdirSync(toolsDir).filter(f => f.endsWith('.js'));
+    res.json(files);
+});
+
+app.post('/api/run-tool', (req, res) => {
+    const { script } = req.body;
+    if (!script) return res.status(400).json({ error: 'No script specified' });
+
+    // Security check to prevent running files outside tools/
+    if (script.includes('..') || script.includes('/')) return res.status(403).json({ error: 'Invalid script path' });
+
+    const toolsDir = path.join(PROJECT_ROOT, 'tools');
+    const scriptPath = path.join(toolsDir, script);
+
+    runCommand('node', toolsDir, 'tool-run', [scriptPath]);
+    res.json({ msg: `Script ${script} started...` });
 });
 
 // --- Global Control Endpoints ---
