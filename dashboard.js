@@ -419,6 +419,22 @@ app.post('/api/hard-reset-db', (req, res) => {
     res.json({ status: 'started' });
 });
 
+// Self-Restart Endpoint
+app.post('/api/restart-self', (req, res) => {
+    res.json({ msg: 'Dashboard restarting...' });
+
+    setTimeout(() => {
+        // Spawn a new instance of this process
+        const subprocess = spawn(process.argv[0], process.argv.slice(1), {
+            detached: true,
+            std: 'ignore',
+            shell: true
+        });
+        subprocess.unref();
+        process.exit();
+    }, 1000);
+});
+
 // Shutdown Endpoint
 app.post('/api/shutdown', (req, res) => {
     res.json({ msg: 'Dashboard shutting down...' });
@@ -432,6 +448,36 @@ app.post('/api/shutdown', (req, res) => {
         });
         process.exit(0);
     }, 1000);
+});
+
+// --- Git Control ---
+app.get('/api/git-status', async (req, res) => {
+    try {
+        const stdout = await execPromise('git status -s');
+        res.json({ output: stdout || 'Clean working directory' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/git-push', (req, res) => {
+    if (processes['git']) return res.status(400).json({ msg: 'Git operation in progress' });
+    const { message } = req.body;
+    const msg = message || 'Update from Dashboard';
+
+    // Chain commands: Add -> Commit -> Push
+    // Note: This relies on credential.helper store being configured!
+    const cmd = `git add . && git commit -m "${msg}" && git push`;
+
+    runCommand(cmd, PROJECT_ROOT, 'git', [], { shell: true });
+    res.json({ msg: 'Git Push started...' });
+});
+
+app.post('/api/git-pull', (req, res) => {
+    if (processes['git']) return res.status(400).json({ msg: 'Git operation in progress' });
+
+    runCommand('git pull', PROJECT_ROOT, 'git', [], { shell: true });
+    res.json({ msg: 'Git Pull started...' });
 });
 
 // --- Global Control Endpoints ---
