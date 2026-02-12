@@ -1,6 +1,7 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const multer = require('multer');
 const connectDB = require('./db/db');
 const walletController = require('./controllers/walletController');
@@ -24,7 +25,6 @@ const backupRoutes = require('./routes/backupRoutes'); // NEW BACKUP ROUTES
 const monitorRoutes = require('./routes/monitorRoutes'); // NEW MONITOR ROUTES
 const BackupScheduler = require('./services/backupScheduler');
 const { authMiddleware, checkRole } = require('./middleware/authMiddleware');
-require('dotenv').config();
 
 const app = express();
 
@@ -41,37 +41,10 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Настройка Multer для загрузки файлов
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, 'uploads', 'avatars');
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const filename = `${Date.now()}-${file.originalname}`;
-    cb(null, filename);
-  }
-});
-const upload = multer({ storage: storage });
-
-// --- Multer для загрузки отчетов (Submissions) ---
-const submissionStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const fs = require('fs');
-    const uploadPath = path.join(__dirname, 'uploads', 'submissions');
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    // В идеале мы хотим walletAddress в имени файла, но он может прийти позже в теле запроса
-    // Поэтому используем timestamp и random
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'submission-' + uniqueSuffix + '-' + file.originalname);
-  }
-});
-const submissionUpload = multer({ storage: submissionStorage });
+// Настройка Multer для загрузки файлов (New Middleware)
+const createUpload = require('./middleware/uploadMiddleware');
+const uploadAvatar = createUpload('avatar');
+const submissionUpload = createUpload('submission');
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -179,7 +152,7 @@ app.post("/api/complete-task", async (req, res) => {
   }
 });
 
-app.post('/api/users/update-profile', upload.single('avatar'), async (req, res) => {
+app.post('/api/users/update-profile', uploadAvatar.single('avatar'), async (req, res) => {
   try {
     const updatedWallet = await userController.updateProfile(req);
     if (updatedWallet) {

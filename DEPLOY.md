@@ -1,27 +1,27 @@
-# Инструкция по развертыванию (DEPLOY)
+# Deployment Guide (DEPLOY)
 
-Этот проект состоит из **Node.js Backend** (Express + MongoDB) и **React Frontend**.
-Архитектура: Клиент-Сервер.
-Совместимость: Linux (x86_64, ARM64), Windows.
+This project consists of a **Node.js Backend** (Express + MongoDB) and a **React Frontend**.
+Architecture: Client-Server.
+Compatibility: Linux (x86_64, ARM64), Windows.
 
-## 📋 Требования
-- **OS**: Ubuntu 20.04+ / Debian 11+ (рекомендуется)
-- **Node.js**: v18.x или v20.x
+## 📋 Requirements
+- **OS**: Ubuntu 20.04+ / Debian 11+ (recommended)
+- **Node.js**: v18.x or v20.x
 - **MongoDB**: v5.0+
-- **Nginx**: Для проксирования запросов (рекомендуется)
-- **PM2**: Для управления процессами (глобально: `npm i -g pm2`)
+- **Nginx**: For request proxying (recommended)
+- **PM2**: For process management (global: `npm i -g pm2`)
 
-## 🚀 1. Установка
+## 🚀 1. Installation
 
-1. **Клонирование репозитория**
-   На сервере выполните:
+1. **Clone Repository**
+   On your server run:
    ```bash
-   git clone <URL_ВАШЕГО_РЕПОЗИТОРИЯ> site_deeplom
+   git clone https://github.com/cbellory/UniHub.git site_deeplom
    cd site_deeplom
    ```
 
-2. **Установка зависимостей**
-   В корневой папке выполните:
+2. **Install Dependencies**
+   In the root folder run:
 
 **Backend:**
 ```bash
@@ -35,34 +35,34 @@ cd frontend
 npm install
 ```
 
-## ⚙️ 2. Настройка конфигурации (.env)
+## ⚙️ 2. Configuration (.env)
 
-В проекте есть файлы `.env.example`. Используйте их как шаблон.
+The project includes `.env.example` files. Use them as templates.
 
 ### Backend
-1. Скопируйте пример: `cp .env.example .env`
-2. Отредактируйте: `nano .env`
-   - `PORT`: Порт бэкенда (по умолчанию 5555)
-   - `MONGODB_URI`: Строка подключения к базе
+1. Copy example: `cp .env.example .env`
+2. Edit: `nano .env`
+   - `PORT`: Backend port (default 5555)
+   - `MONGODB_URI`: Database connection string
 
 ### Frontend
-1. Скопируйте пример: `cp .env.example .env`
-2. Отредактируйте: `nano .env`
-   - `REACT_APP_API_URL`: Если используете Nginx, оставьте `/api`. Если нет — укажите полный путь `http://IP:5555/api`
-   - `GENERATE_SOURCEMAP=false`: Для продакшена
+1. Copy example: `cp .env.example .env`
+2. Edit: `nano .env`
+   - `REACT_APP_API_URL`: If using Nginx, keep `/api`. If not — specify full path `http://IP:5555/api`
+   - `GENERATE_SOURCEMAP=false`: For production
 
-## 🏗️ 3. Сборка Frontend
-Для работы в продакшене фронтенд нужно скомпилировать в статику:
+## 🏗️ 3. Build Frontend
+For production, the frontend needs to be compiled into static files:
 
 ```bash
 cd frontend
 npm run build
-# Появится папка build/
+# A build/ folder will be created
 ```
 
-## 🏃 4. Запуск
+## 🏃 4. Run
 
-### Backend (через PM2)
+### Backend (via PM2)
 ```bash
 cd backend
 pm2 start server.js --name "deeplom-backend"
@@ -70,10 +70,10 @@ pm2 save
 pm2 startup
 ```
 
-### Frontend (через Nginx)
-Настройте Nginx как обратный прокси. 
+### Frontend (via Nginx)
+Configure Nginx as a reverse proxy.
 
-Пример конфига (`/etc/nginx/sites-available/deeplom`):
+Example config (`/etc/nginx/sites-available/deeplom`):
 ```nginx
 server {
     listen 80;
@@ -97,7 +97,7 @@ server {
 }
 ```
 
-## 💾 5. База данных (Перенос)
-1. На старом сервере: `node backend/backup-db-script.js`
-2. Заберите архив из `backups/db/`.
-3. На новом сервере восстановите через `mongorestore`.
+## 💾 5. Database (Migration)
+1. On old server: `node backend/backup-db-script.js`
+2. Copy archive from `backups/db/`.
+3. On new server restore via `mongorestore`.

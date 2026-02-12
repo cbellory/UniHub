@@ -59,13 +59,7 @@ exports.getPerformanceMetrics = async (req, res) => {
 
         // 2. Get Students with Groups populated
         // We only care about students IN GROUPS (enrolled)
-        const students = await Wallet.find({ group: { $ne: null } })
-            .populate({
-                path: 'groupObject', // Assuming you added virtual or populated manually. 
-                // Let's rely on standard search first, assuming 'group' field is a String name in your Wallet model based on previous files
-                // If 'group' is just a string name, we need to find the Group doc by name.
-                // Let's fetch all groups first to map Name -> Doc
-            });
+        const students = await Wallet.find({ group: { $ne: null } });
 
         const allGroups = await Group.find().populate('courses');
         const groupMap = {}; // GroupName -> Array of CourseIDs

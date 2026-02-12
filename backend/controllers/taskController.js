@@ -298,7 +298,8 @@ exports.updateTask = async (req) => {
     }
 
     if (req.file) {
-      task.imageUrl = `/uploads/avatars/${req.file.filename}`;
+      const relPath = req.file.path.split('uploads')[1];
+      if (relPath) task.imageUrl = '/uploads' + relPath.replace(/\\/g, '/');
     }
 
     await task.save();
@@ -329,7 +330,11 @@ exports.addTaskWithImage = async (req) => {
   }
 
   try {
-    const imageUrl = req.file ? `/uploads/avatars/${req.file.filename}` : null;
+    let imageUrl = null;
+    if (req.file) {
+      const relPath = req.file.path.split('uploads')[1];
+      if (relPath) imageUrl = '/uploads' + relPath.replace(/\\/g, '/');
+    }
     let tags = [];
     if (rawTags) {
       if (typeof rawTags === 'string') {
@@ -474,14 +479,12 @@ exports.submitTaskReport = async (req) => {
 
   let proofImageUrl = null;
   if (req.file) {
-    // req.file уже сохранен Multer-ом, но нам нужно убедиться, что путь корректен
-    // Мы настроим Multer в роуте, чтобы он сохранял в /uploads/submissions/ADDRESS/
-    // Но пока используем путь, который дал Multer
-    proofImageUrl = `/uploads/submissions/${req.file.filename}`;
-
-    // *Важное замечание*: в app.js настроен общий multer, который кидает все в uploads/avatars.
-    // Мы это поправим, создав отдельный конфиг multer для сабмитов.
+    const relPath = req.file.path.split('uploads')[1];
+    if (relPath) proofImageUrl = '/uploads' + relPath.replace(/\\/g, '/');
   }
+
+  // *Важное замечание*: в app.js настроен общий multer, который кидает все в uploads/avatars.
+  // Мы это поправим, создав отдельный конфиг multer для сабмитов.
 
   const submission = new TaskSubmission({
     taskId,

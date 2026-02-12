@@ -2,16 +2,16 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema({
-  loginName: { 
+  loginName: {
     type: String,
     required: true,
     unique: true
   },
-  password: { 
+  password: {
     type: String,
     required: true
   },
-  role: { 
+  role: {
     type: String,
     enum: ['superadmin', 'admin', 'moderator'],
     required: true
@@ -19,10 +19,11 @@ const UserSchema = new mongoose.Schema({
 });
 
 // Хэширование пароля перед сохранением
-UserSchema.pre('save', async function (next) {
+// Хэширование пароля перед сохранением
+UserSchema.pre('save', async function () {
   try {
     // Проверяем, изменился ли пароль перед его хешированием
-    if (!this.isModified('password')) return next();
+    if (!this.isModified('password')) return;
 
     console.log(`Начинаем хеширование пароля для пользователя ${this.loginName}`);
 
@@ -36,10 +37,9 @@ UserSchema.pre('save', async function (next) {
 
     // Сохраняем хешированный пароль
     this.password = hashedPassword;
-    next();
   } catch (error) {
     console.error('Ошибка при хешировании пароля:', error);
-    next(error);
+    throw error;
   }
 });
 
@@ -48,11 +48,11 @@ UserSchema.methods.comparePassword = async function (password) {
   try {
     console.log(`Введённый пароль: ${password}`);
     console.log(`Хеш пароля из базы данных: ${this.password}`);
-    
+
     // Сравниваем введённый пароль с хешем из базы данных
     const isMatch = await bcrypt.compare(password, this.password);
     console.log(`Результат сравнения пароля для ${this.loginName}: ${isMatch ? 'совпало' : 'не совпало'}`);
-    
+
     return isMatch;
   } catch (error) {
     console.error('Ошибка при сравнении паролей:', error);

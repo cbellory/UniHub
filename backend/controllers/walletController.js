@@ -5,6 +5,21 @@ exports.registerWallet = async (req) => {
   console.log('[Register Endpoint] Получен новый запрос. Тело:', JSON.stringify(req.body, null, 2));
   let { address, ip } = req.body;
   if (!ip && req.ip) ip = req.ip;
+  const path = require('path');
+  const fs = require('fs');
+
+  // Ensure User Directories Exist
+  const userUploadPath = path.join(__dirname, '../uploads/users', address.replace(/[^a-zA-Z0-9_-]/g, '_'));
+  if (!fs.existsSync(userUploadPath)) {
+    try {
+      fs.mkdirSync(path.join(userUploadPath, 'avatars'), { recursive: true });
+      fs.mkdirSync(path.join(userUploadPath, 'submissions'), { recursive: true });
+      console.log(`[Registration] Created upload directories for ${address}`);
+    } catch (err) {
+      console.error(`[Registration] Failed to create directories for ${address}:`, err);
+    }
+  }
+
   const referralAddress = req.body.referral;
   try {
     let wallet = await Wallet.findOne({ address: new RegExp(`^${address}$`, 'i') });
@@ -19,7 +34,7 @@ exports.registerWallet = async (req) => {
         battlePassLevel: 1,
         battlePassProgress: 0,
         username: `User-${address.slice(0, 6)}`,
-        avatarUrl: '/uploads/avatars/default_avatar.png',
+        avatarUrl: '/uploads/content/default_avatar.png',
         group: "",
         referrals: []
       };

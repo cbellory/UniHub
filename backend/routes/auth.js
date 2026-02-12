@@ -22,7 +22,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Неверный логин или пароль' });
     }
 
-    const isPasswordValid = user.password === password || await user.comparePassword(password);
+    const isPasswordValid = await user.comparePassword(password);
 
     console.log("Результат проверки пароля:", isPasswordValid);
 

@@ -54,7 +54,20 @@ exports.getUserProfile = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   const { address, username } = req.body;
-  const avatarUrl = req.file ? `/uploads/avatars/${req.file.filename}` : null;
+
+  // FIX: Dynamic Path Construction
+  let avatarUrl = null;
+  if (req.file) {
+    // Convert absolute path to relative public URL
+    // req.file.path is absolute. We need to find /uploads/...
+    const relPath = req.file.path.split('uploads')[1];
+    if (relPath) {
+      avatarUrl = '/uploads' + relPath.replace(/\\/g, '/');
+    } else {
+      // Fallback
+      avatarUrl = `/uploads/${req.file.filename}`;
+    }
+  }
   try {
     const wallet = await Wallet.findOne({ address: new RegExp(`^${address}$`, 'i') });
     if (!wallet) return null;

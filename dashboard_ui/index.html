@@ -334,7 +334,9 @@
 
         <button class="nav-btn active" onclick="switchTab('overview')">🏠 Overview</button>
         <button class="nav-btn" onclick="switchTab('control')">⚙️ Controls</button>
+        <button class="nav-btn" onclick="switchTab('settings')">🔧 Settings</button>
         <button class="nav-btn" onclick="switchTab('tools')">🛠 Tools</button>
+        <button class="nav-btn" onclick="switchTab('team')">👥 Team</button>
         <button class="nav-btn" onclick="switchTab('git')">☁️ Git Deploy</button>
         <button class="nav-btn" onclick="switchTab('backup')">💾 Backups</button>
 
@@ -414,13 +416,38 @@
                 <div class="card">
                     <h3>Git Operations</h3>
                     <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px;">
-                        Use these controls to sync your code with GitHub.
+                        Use these controls to sync your code with GitHub and manage branches.
                     </p>
                     <div class="grid">
                         <button class="action-btn" onclick="checkGitStatus()">🔍 Check Status</button>
                         <button class="action-btn btn-primary" onclick="gitPush()">⬆ Push to GitHub</button>
                         <button class="action-btn btn-success" onclick="api('/api/git-pull')">⬇ Pull Updates</button>
                     </div>
+                </div>
+
+                <div class="card" style="margin-top: 20px;">
+                    <h3>Branch Management</h3>
+                    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                        <span style="color: #94a3b8;">Current:</span>
+                        <span id="current-branch" style="color: var(--accent); font-weight: bold;">Loading...</span>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="git-branches"
+                            style="background: #1e293b; color: white; border: 1px solid #475569; padding: 10px; border-radius: 6px; flex: 1;">
+                            <option>Loading branches...</option>
+                        </select>
+                        <button class="action-btn btn-primary" style="width: auto;"
+                            onclick="gitCheckout()">Checkout</button>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 20px; border-color: rgba(239, 68, 68, 0.3);">
+                    <h3 style="color: var(--danger);">Danger Zone</h3>
+                    <p style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 15px;">
+                        Irreversible actions. Proceed with caution.
+                    </p>
+                    <button class="action-btn btn-danger" onclick="gitReset()">🧨 Hard Reset (Discard All
+                        Changes)</button>
                 </div>
             </div>
 
@@ -433,6 +460,75 @@
                     <div id="tools-list" class="grid">
                         <!-- Tools injected here -->
                     </div>
+                </div>
+            </div>
+
+            <!-- TAB: TEAM (Admins) -->
+            <div id="tab-team" class="tab-content">
+                <div class="grid">
+                    <div class="card">
+                        <h3>Create New Admin</h3>
+                        <div style="display: flex; gap: 10px; flex-direction: column;">
+                            <input type="text" id="new-admin-login" placeholder="Login"
+                                style="padding: 10px; background: #000; border: 1px solid var(--border); color: white; border-radius: 6px;">
+                            <input type="password" id="new-admin-pass" placeholder="Password"
+                                style="padding: 10px; background: #000; border: 1px solid var(--border); color: white; border-radius: 6px;">
+                            <select id="new-admin-role">
+                                <option value="admin">Admin</option>
+                                <option value="moderator">Moderator</option>
+                                <option value="superadmin">Superadmin</option>
+                            </select>
+                            <button class="action-btn btn-primary" onclick="createAdmin()">➕ Create User</button>
+                        </div>
+                    </div>
+
+                    <div class="card" style="grid-column: span 2;">
+                        <h3>Admin Team</h3>
+                        <div id="admin-list" style="display: flex; flex-direction: column; gap: 10px;">
+                            <!-- List injected here -->
+                            <div style="color: #888;">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: SETTINGS (Setup Wizard) -->
+            <div id="tab-settings" class="tab-content">
+                <div class="card">
+                    <h3>⚙️ Project Configuration (Setup Wizard)</h3>
+                    <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px;">
+                        Server IP, Ports & API Keys. Changes require a system restart.
+                    </p>
+
+                    <div style="display: grid; gap: 20px; grid-template-columns: 1fr 1fr;">
+                        <!-- Backend Config -->
+                        <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
+                            <h4 style="margin-top:0; color: #f59e0b;">Backend Settings</h4>
+                            <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Server Port</label>
+                            <input type="text" id="cfg-backend-port" placeholder="5555"
+                                style="width:100%; padding:8px; background:#1e293b; border:1px solid #475569; color:white; border-radius:4px; margin-bottom:10px;">
+
+                            <label style="display:block; margin-bottom:5px; font-size:0.8rem;">MongoDB URI</label>
+                            <input type="text" id="cfg-backend-mongo" placeholder="mongodb://..."
+                                style="width:100%; padding:8px; background:#1e293b; border:1px solid #475569; color:white; border-radius:4px;">
+                        </div>
+
+                        <!-- Frontend Config -->
+                        <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
+                            <h4 style="margin-top:0; color: #6366f1;">Frontend Settings</h4>
+                            <label style="display:block; margin-bottom:5px; font-size:0.8rem;">API URL (Public)</label>
+                            <input type="text" id="cfg-frontend-api" placeholder="http://IP:5555/api"
+                                style="width:100%; padding:8px; background:#1e293b; border:1px solid #475569; color:white; border-radius:4px; margin-bottom:10px;">
+
+                            <label style="display:block; margin-bottom:5px; font-size:0.8rem;">WalletConnect ID</label>
+                            <input type="text" id="cfg-frontend-wallet" placeholder="Project ID..."
+                                style="width:100%; padding:8px; background:#1e293b; border:1px solid #475569; color:white; border-radius:4px;">
+                        </div>
+                    </div>
+
+                    <button class="action-btn btn-primary" onclick="saveConfig()" style="margin-top: 20px;">💾 Save
+                        Configuration</button>
+                    <p id="cfg-status" style="margin-top:10px; font-size:0.9rem; color:#10b981; min-height:1.2em;"></p>
                 </div>
             </div>
 
@@ -479,6 +575,7 @@
 
             document.getElementById('tab-' + tabId).classList.add('active');
             event.target.classList.add('active');
+            if (tabId === 'git') loadBranches();
         }
 
         // --- TERMINAL LOGIC ---
@@ -506,6 +603,57 @@
         async function api(url) {
             try {
                 await fetch(url, { method: 'POST' });
+            } catch (e) { log('Error: ' + e.message); }
+        }
+
+        async function loadBranches() {
+            try {
+                const res = await fetch('/api/git/branches');
+                const data = await res.json();
+                const sel = document.getElementById('git-branches');
+                const currentEl = document.getElementById('current-branch');
+
+                sel.innerHTML = '';
+                if (data.all) {
+                    data.all.forEach(b => {
+                        const opt = document.createElement('option');
+                        opt.value = b;
+                        opt.text = b;
+                        if (b === data.current) opt.selected = true;
+                        sel.add(opt);
+                    });
+                    currentEl.innerText = data.current;
+                }
+            } catch (e) {
+                console.error("Error loading branches", e);
+            }
+        }
+
+        async function gitCheckout() {
+            const branch = document.getElementById('git-branches').value;
+            if (!confirm(`Switch to branch '${branch}'? Local changes might conflict.`)) return;
+
+            log(`Checking out ${branch}...`);
+            try {
+                const res = await fetch('/api/git/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ branch })
+                });
+                const d = await res.json();
+                log(d.message || d.error);
+                loadBranches(); // Refresh
+            } catch (e) { log('Error: ' + e.message); }
+        }
+
+        async function gitReset() {
+            if (!confirm("DANGER: This will discard ALL local changes and reset to HEAD. Are you sure?")) return;
+
+            log('Resetting hard to HEAD...');
+            try {
+                const res = await fetch('/api/git/reset', { method: 'POST' });
+                const d = await res.json();
+                log(d.message || d.error);
             } catch (e) { log('Error: ' + e.message); }
         }
 
@@ -547,6 +695,51 @@
                     body: JSON.stringify({ message: msg, bumpType })
                 });
             } catch (e) { log('API Error: ' + e.message); }
+        }
+
+        // --- CONFIG WIZARD ---
+        async function loadConfig() {
+            try {
+                const res = await fetch('/api/config');
+                const d = await res.json();
+
+                document.getElementById('cfg-backend-port').value = d.backend.port;
+                document.getElementById('cfg-backend-mongo').value = d.backend.mongoUri;
+                document.getElementById('cfg-frontend-api').value = d.frontend.apiUrl;
+                document.getElementById('cfg-frontend-wallet').value = d.frontend.walletProjectId;
+            } catch (e) { console.error(e); }
+        }
+        // Load on init
+        loadConfig();
+
+        async function saveConfig() {
+            const btn = event.target;
+            btn.innerText = 'Saving...';
+
+            const payload = {
+                backend: {
+                    port: document.getElementById('cfg-backend-port').value,
+                    mongoUri: document.getElementById('cfg-backend-mongo').value
+                },
+                frontend: {
+                    apiUrl: document.getElementById('cfg-frontend-api').value,
+                    walletProjectId: document.getElementById('cfg-frontend-wallet').value
+                }
+            };
+
+            try {
+                const res = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const d = await res.json();
+                document.getElementById('cfg-status').innerText = d.msg || d.error;
+                log('Config Saved. Restart required.');
+            } catch (e) {
+                document.getElementById('cfg-status').innerText = 'Error saving config';
+            }
+            btn.innerText = '💾 Save Configuration';
         }
 
         // --- SYSTEM STATUS SOCKET ---
@@ -641,6 +834,7 @@
         }
         loadTools();
 
+
         async function runTool(script) {
             if (confirm(`Run script: ${script}?`)) {
                 await fetch('/api/run-tool', {
@@ -649,6 +843,88 @@
                     body: JSON.stringify({ script })
                 });
             }
+        }
+
+        // --- TEAM / ADMIN MANAGEMENT ---
+        async function loadAdmins() {
+            try {
+                const res = await fetch('/api/admins');
+                const list = await res.json();
+                const container = document.getElementById('admin-list');
+                container.innerHTML = '';
+
+                list.forEach(user => {
+                    const div = document.createElement('div');
+                    div.style.background = 'rgba(255,255,255,0.05)';
+                    div.style.padding = '10px 15px';
+                    div.style.borderRadius = '8px';
+                    div.style.display = 'flex';
+                    div.style.justifyContent = 'space-between';
+                    div.style.alignItems = 'center';
+
+                    const roleColor = user.role === 'superadmin' ? '#f59e0b' : (user.role === 'admin' ? '#6366f1' : '#10b981');
+
+                    div.innerHTML = `
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <div style="font-weight:600; font-size:1rem;">${user.loginName}</div>
+                            <span style="font-size:0.75rem; padding:2px 8px; border-radius:10px; background:${roleColor}20; color:${roleColor}; border:1px solid ${roleColor}40;">${user.role.toUpperCase()}</span>
+                        </div>
+                        <button class="action-btn btn-danger" style="width:auto; padding:5px 10px; font-size:0.8rem; margin:0;" onclick="deleteAdmin('${user._id}', '${user.loginName}')">🗑</button>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function createAdmin() {
+            const loginName = document.getElementById('new-admin-login').value;
+            const password = document.getElementById('new-admin-pass').value;
+            const role = document.getElementById('new-admin-role').value;
+
+            if (!loginName || !password) return alert('Please fill in login and password');
+
+            const btn = event.target;
+            btn.innerText = 'Creating...';
+
+            try {
+                const res = await fetch('/api/create-admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ loginName, password, role })
+                });
+                const d = await res.json();
+                if (d.error) alert('Error: ' + d.error);
+                else {
+                    log('Success: Admin Created');
+                    document.getElementById('new-admin-login').value = '';
+                    document.getElementById('new-admin-pass').value = '';
+                    loadAdmins();
+                }
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+            btn.innerText = '➕ Create User';
+        }
+
+        async function deleteAdmin(id, name) {
+            if (confirm(`Delete user "${name}"? This cannot be undone.`)) {
+                try {
+                    await fetch('/api/delete-admin/' + id, { method: 'DELETE' });
+                    loadAdmins();
+                    log(`Deleted admin: ${name}`);
+                } catch (e) {
+                    alert('Error: ' + e.message);
+                }
+            }
+        }
+
+        // Auto-load admins when tab is switched
+        const originalSwitchTab = switchTab;
+        switchTab = function (tabId) {
+            originalSwitchTab(tabId);
+            if (tabId === 'team') loadAdmins();
         }
     </script>
 </body>

@@ -1,14 +1,16 @@
 {
   "name": "unihub-root",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "dependencies": {
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@mui/material": "^5.11.10",
     "axios": "^1.13.2",
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "mongoose": "^9.1.5",
+    "simple-git": "^3.30.0",
     "ws": "^8.18.3"
   },
   "scripts": {

@@ -8,9 +8,7 @@ const connectDB = async () => {
       console.log("🔄 Попытка подключения к MongoDB:", connStr);
 
       await mongoose.connect(connStr, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        serverSelectionTimeoutMS: 5000, // Короткий таймаут для быстрых повторных попыток
+        serverSelectionTimeoutMS: 5000,
         socketTimeoutMS: 45000,
       });
 

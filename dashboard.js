@@ -15,6 +15,30 @@ const BACKEND_DIR = path.join(PROJECT_ROOT, 'backend');
 const FRONTEND_DIR = path.join(PROJECT_ROOT, 'frontend');
 const ADMIN_DIR = path.join(PROJECT_ROOT, 'admin');
 
+// NEW: Git Support
+const git = require('simple-git')(PROJECT_ROOT);
+
+// --- DATABASE CONNECTION (For Admin Management) ---
+// CRITICAL: Must use the SAME mongoose instance as the backend model (v5.x)
+// Otherwise User model (registered on backend mongoose) won't see this connection.
+const mongoose = require(path.join(BACKEND_DIR, 'node_modules', 'mongoose'));
+const User = require(path.join(BACKEND_DIR, 'models', 'User.js'));
+
+// Connect to DB using the same URI as backend (usually port 27018 for legacy-mongo)
+// We'll try to read it from .env or default to 27018
+const backendEnvPath = path.join(BACKEND_DIR, '.env');
+let mongoUri = 'mongodb://127.0.0.1:27018/walletsDB';
+
+if (fs.existsSync(backendEnvPath)) {
+    const envContent = fs.readFileSync(backendEnvPath, 'utf8');
+    const match = envContent.match(/MONGODB_URI=(.*)/);
+    if (match && match[1]) mongoUri = match[1].trim();
+}
+
+mongoose.connect(mongoUri)
+    .then(() => console.log('Dashboard connected to MongoDB (Admin Management Ready)'))
+    .catch(err => console.error('Dashboard MongoDB Connection Error:', err));
+
 const uiDir = path.join(__dirname, 'dashboard_ui');
 if (!fs.existsSync(uiDir)) fs.mkdirSync(uiDir);
 
@@ -450,7 +474,67 @@ app.post('/api/shutdown', (req, res) => {
     }, 1000);
 });
 
-// --- Version API ---
+// --- Config API (Setup Wizard) ---
+function parseEnv(filePath) {
+    if (!fs.existsSync(filePath)) return {};
+    return fs.readFileSync(filePath, 'utf8').split('\n').reduce((acc, line) => {
+        const [key, ...val] = line.split('=');
+        if (key && val) acc[key.trim()] = val.join('=').trim();
+        return acc;
+    }, {});
+}
+
+function writeEnv(filePath, updates) {
+    let current = {};
+    if (fs.existsSync(filePath)) current = parseEnv(filePath);
+    const merged = { ...current, ...updates };
+    const content = Object.entries(merged).map(([k, v]) => `${k}=${v}`).join('\n');
+    fs.writeFileSync(filePath, content);
+}
+
+app.get('/api/config', (req, res) => {
+    try {
+        const backendEnv = parseEnv(path.join(BACKEND_DIR, '.env'));
+        const frontendEnv = parseEnv(path.join(FRONTEND_DIR, '.env'));
+
+        res.json({
+            backend: {
+                port: backendEnv.PORT || '5555',
+                mongoUri: backendEnv.MONGODB_URI || ''
+            },
+            frontend: {
+                apiUrl: frontendEnv.REACT_APP_API_URL || '',
+                walletProjectId: frontendEnv.REACT_APP_WALLET_CONNECT_PROJECT_ID || ''
+            }
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/config', (req, res) => {
+    const { backend, frontend } = req.body;
+
+    try {
+        if (backend) {
+            writeEnv(path.join(BACKEND_DIR, '.env'), {
+                PORT: backend.port,
+                MONGODB_URI: backend.mongoUri
+            });
+        }
+
+        if (frontend) {
+            writeEnv(path.join(FRONTEND_DIR, '.env'), {
+                REACT_APP_API_URL: frontend.apiUrl,
+                REACT_APP_WALLET_CONNECT_PROJECT_ID: frontend.walletProjectId
+            });
+        }
+
+        res.json({ msg: 'Configuration saved. Please Restart All Systems to apply.' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
 app.get('/api/version', (req, res) => {
     try {
         const pkg = JSON.parse(fs.readFileSync(path.join(PROJECT_ROOT, 'package.json'), 'utf8'));
@@ -539,6 +623,45 @@ app.post('/api/run-tool', (req, res) => {
 
     runCommand('node', toolsDir, 'tool-run', [scriptPath]);
     res.json({ msg: `Script ${script} started...` });
+});
+
+// --- ADMIN MANAGEMENT API ---
+
+app.get('/api/admins', async (req, res) => {
+    try {
+        const admins = await User.find({}, 'loginName role');
+        res.json(admins);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/create-admin', async (req, res) => {
+    const { loginName, password, role } = req.body;
+    if (!loginName || !password || !role) return res.status(400).json({ error: 'Missing fields' });
+
+    try {
+        const existing = await User.findOne({ loginName });
+        if (existing) return res.status(400).json({ error: 'User already exists' });
+
+        const newUser = new User({ loginName, password, role });
+        await newUser.save(); // Model handles hashing
+
+        broadcastLog('other', `New Admin Created: ${loginName} (${role})`);
+        res.json({ msg: 'User created' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.delete('/api/delete-admin/:id', async (req, res) => {
+    try {
+        await User.findByIdAndDelete(req.params.id);
+        broadcastLog('other', `Admin Deleted: ID ${req.params.id}`);
+        res.json({ msg: 'User deleted' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 // --- Global Control Endpoints ---
@@ -668,6 +791,53 @@ app.post('/api/start-all', async (req, res) => {
     } catch (err) {
         broadcastLog('other', `❌ Error during startup: ${err.message}`);
         res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/git/commit', async (req, res) => {
+    const { message } = req.body;
+    if (!message) return res.status(400).json({ error: 'Commit message required' });
+    try {
+        await git.add('.');
+        const result = await git.commit(message);
+        broadcastLog('git', `Commit successful: ${result.summary.changes} changes`);
+        res.json(result);
+    } catch (error) {
+        broadcastLog('git', `Commit error: ${error.message}`);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// NEW: Git Branch Management
+app.get('/api/git/branches', async (req, res) => {
+    try {
+        const branchSummary = await git.branch();
+        res.json(branchSummary);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/git/checkout', async (req, res) => {
+    const { branch } = req.body;
+    if (!branch) return res.status(400).json({ error: 'Branch name required' });
+    try {
+        await git.checkout(branch);
+        const status = await git.status();
+        broadcastLog('git', `Switched to branch: ${branch}`);
+        res.json({ message: `Switched to ${branch}`, status });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/git/reset', async (req, res) => {
+    try {
+        await git.reset('hard');
+        broadcastLog('git', 'Hard reset to HEAD executed.');
+        res.json({ message: 'Reset successful' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 

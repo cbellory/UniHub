@@ -7,17 +7,8 @@ const userController = require('../controllers/userController');
 const { authMiddleware, checkRole } = require('../middleware/authMiddleware');
 
 // --- 2. Настраиваем multer, как в app.js ---
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../uploads', 'avatars');
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const filename = `${Date.now()}-${file.originalname}`;
-    cb(null, filename);
-  }
-});
-const upload = multer({ storage: storage });
+const createUpload = require('../middleware/uploadMiddleware');
+const upload = createUpload('task'); // Tasks and general content
 
 
 // --- Маршруты для задач (Tasks) ---
